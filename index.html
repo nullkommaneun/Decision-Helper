@@ -1,0 +1,434 @@
+<!doctype html>
+
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Decision Capsule · Lokal · Offline</title>
+  <meta name="description" content="Treffe bessere Entscheidungen: Hypothese festhalten, Erfolgskriterien definieren, Review-Termin setzen, später auswerten – alles lokal, ohne Cloud." />
+  <style>
+    :root{
+      --bg:#0b0f14; --panel:#111722; --panel-2:#0f1520; --text:#eef3f8; --muted:#99a3ad; --pri:#4cc9f0; --ok:#2dd36f; --warn:#ffd166; --err:#ef476f; --accent:#a78bfa;
+      --border: rgba(255,255,255,0.08); --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font:16px/1.4 system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;background:radial-gradient(1200px 800px at 80% -10%, rgba(76,201,240,.15), transparent), linear-gradient(180deg,#0b0f14,#0a0d12);color:var(--text)}
+    header{position:sticky;top:0;background:rgba(11,15,20,.7);backdrop-filter:saturate(140%) blur(8px);border-bottom:1px solid var(--border);z-index:10}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:34px;height:34px;border-radius:10px;background:conic-gradient(from 0deg at 50% 50%, var(--pri), var(--accent), #64dfdf, var(--pri));box-shadow:inset 0 0 0 2px rgba(255,255,255,.08), 0 6px 16px rgba(76,201,240,.2)}
+    h1{margin:0;font-size:20px;letter-spacing:.3px}
+    .sub{color:var(--muted);font-size:13px}
+    main{max-width:1100px;margin:24px auto;padding:0 18px;display:grid;grid-template-columns: 1.1fr .9fr;gap:20px}
+    .card{background:linear-gradient(180deg, var(--panel), var(--panel-2));border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
+    .card h2{margin:0 0 10px 0;font-size:18px}
+    .card .head{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card .body{padding:18px}
+    label{display:block;margin:.4rem 0 .25rem;color:var(--muted);font-size:13px}
+    input[type="text"], input[type="date"], input[type="number"], textarea, select{
+      width:100%;background:#0c121b;border:1px solid var(--border);color:var(--text);border-radius:12px;padding:10px 12px;font-size:15px;outline:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02)
+    }
+    textarea{min-height:96px;resize:vertical}
+    .row{display:grid;grid-template-columns: 1fr 1fr;gap:12px}
+    .row-3{display:grid;grid-template-columns: 1fr 1fr 1fr;gap:12px}
+    .muted{color:var(--muted)}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:#0d1420;color:var(--text);cursor:pointer;user-select:none}
+    .btn:hover{background:#0f1826}
+    .btn.pri{background:linear-gradient(180deg,#1a2a3f,#162538);border-color:#1c2c44}
+    .btn.ok{background:linear-gradient(180deg,#10351e,#0d2a18);border-color:#113722}
+    .btn.warn{background:linear-gradient(180deg,#3b2e0e,#2a210b);border-color:#4a3a12}
+    .btn.err{background:linear-gradient(180deg,#3a1018,#2b0c12);border-color:#4b1620}
+    .flex{display:flex;gap:10px;flex-wrap:wrap}
+    .right{margin-left:auto}
+    .tag{display:inline-flex;align-items:center;gap:6px;background:#0e1520;border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:12px;color:var(--muted)}
+    .list{display:grid;gap:10px}
+    .item{padding:12px;border-radius:12px;border:1px solid var(--border);background:linear-gradient(180deg,#0e1520,#0c121b)}
+    .item h3{margin:0 0 6px 0;font-size:16px}
+    .item .meta{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+    .stats{display:grid;grid-template-columns: repeat(3,1fr);gap:10px}
+    .stat{border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,#0e1520,#0b111a);padding:14px}
+    .stat b{font-size:22px}
+    .hr{border-top:1px dashed var(--border);margin:12px 0}
+    .footer{max-width:1100px;margin:30px auto 60px;padding:0 18px;color:var(--muted);font-size:13px}
+    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;background:#0a0f16;border:1px solid var(--border);padding:2px 6px;border-radius:6px}
+    .pill{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:#0d1420;color:#cbd5e1;font-size:12px}
+    .due{color:var(--warn)}.overdue{color:var(--err)}.okc{color:var(--ok)}
+    @media (max-width: 900px){ main{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Decision Capsule <span class="pill">lokal · offline</span></h1>
+          <div class="sub">Hypothese → Entscheidung → Review. Bessere Entscheidungen, ohne Cloud.</div>
+        </div>
+        <div class="right flex">
+          <button class="btn" id="btn-export-json" title="Alle Kapseln als JSON exportieren">Export JSON</button>
+          <label class="btn" for="import-json">Import JSON<input id="import-json" type="file" accept="application/json" style="display:none"></label>
+        </div>
+      </div>
+    </div>
+  </header>  <main>
+    <!-- Left: Create / Edit -->
+    <section class="card" aria-label="Neue Capsule">
+      <div class="head"><h2>Neue Capsule</h2><span class="tag">Alles bleibt lokal</span></div>
+      <div class="body">
+        <div class="row">
+          <div>
+            <label for="title">Titel</label>
+            <input id="title" type="text" placeholder="z. B. Neues Handy kaufen – ja oder nein?" />
+          </div>
+          <div>
+            <label for="reviewDate">Review-Datum</label>
+            <input id="reviewDate" type="date" />
+          </div>
+        </div>
+        <label for="decision">Entscheidung (Kurzsatz)</label>
+        <input id="decision" type="text" placeholder="Ich entscheide mich für Option B (Begründung folgt)." /><div class="row">
+      <div>
+        <label for="options">Optionen (eine pro Zeile)</label>
+        <textarea id="options" placeholder="Option A\nOption B\nOption C"></textarea>
+      </div>
+      <div>
+        <label for="chosen">Gewählte Option</label>
+        <input id="chosen" type="text" placeholder="Option B" />
+        <label for="confidence" style="margin-top:10px">Erfolgswahrscheinlichkeit (Confidence, %)</label>
+        <input id="confidence" type="number" min="1" max="99" step="1" value="70" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="reasons">Hauptgründe (eine pro Zeile)</label>
+        <textarea id="reasons" placeholder="Grund 1\nGrund 2\nGrund 3"></textarea>
+      </div>
+      <div>
+        <label for="assumptions">Annahmen/Risiken (eine pro Zeile)</label>
+        <textarea id="assumptions" placeholder="Annahme 1\nRisiko 1"></textarea>
+      </div>
+    </div>
+
+    <label for="success">Erfolgskriterium(e)</label>
+    <input id="success" type="text" placeholder="Woran erkennst du Erfolg? (z. B. Kosten < 300 € & Zufriedenheit ≥ 8/10)" />
+
+    <div class="row">
+      <div>
+        <label for="notes">Notizen (optional)</label>
+        <textarea id="notes" placeholder="Kontext, Alternativen, Nebenbedingungen …"></textarea>
+      </div>
+      <div>
+        <label for="templateSel">Vorlage</label>
+        <select id="templateSel"></select>
+        <div class="hr"></div>
+        <div class="flex">
+          <button class="btn pri" id="btn-save">Capsule speichern</button>
+          <button class="btn" id="btn-ics">Review-Termin (.ics)</button>
+          <button class="btn warn" id="btn-clear">Formular leeren</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Right: Dashboard / List -->
+<section class="card" aria-label="Dashboard & Kapseln">
+  <div class="head"><h2>Dashboard</h2><span class="tag" id="db-last-sync">Stand: –</span></div>
+  <div class="body">
+    <div class="stats">
+      <div class="stat"><div class="muted">Offene Kapseln</div><b id="stat-open">0</b></div>
+      <div class="stat"><div class="muted">Fällig ≤7 Tage</div><b id="stat-soon">0</b></div>
+      <div class="stat"><div class="muted">Kalibrierung (Brier↓)</div><b id="stat-brier">–</b></div>
+    </div>
+    <div class="hr"></div>
+    <h3 style="margin:0 0 8px 0">Fällig & demnächst</h3>
+    <div id="list-due" class="list" aria-live="polite"></div>
+    <div class="hr"></div>
+    <h3 style="margin:0 0 8px 0">Alle Kapseln</h3>
+    <div id="list-all" class="list" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- Review Panel -->
+<section class="card" aria-label="Review" style="grid-column: 1 / -1;">
+  <div class="head"><h2>Review</h2><span class="tag">Ergebnis festhalten → Lernen</span></div>
+  <div class="body">
+    <div class="row">
+      <div>
+        <label for="rev-id">Capsule auswählen</label>
+        <select id="rev-id"></select>
+      </div>
+      <div>
+        <label for="rev-result">Ergebnis</label>
+        <select id="rev-result">
+          <option value="">– bitte wählen –</option>
+          <option value="success">Erfolg (1)</option>
+          <option value="partial">Teil-Erfolg (0.5)</option>
+          <option value="fail">Fehlschlag (0)</option>
+        </select>
+      </div>
+    </div>
+    <label for="rev-notes">Review-Notizen</label>
+    <textarea id="rev-notes" placeholder="Was lernen wir? Unerwartete Faktoren? Würdest du beim nächsten Mal die Annahmen ändern?" ></textarea>
+    <div class="flex">
+      <button class="btn ok" id="btn-save-review">Review speichern</button>
+      <button class="btn" id="btn-export-csv">CSV Export</button>
+    </div>
+  </div>
+</section>
+
+  </main>  <div class="footer wrap">
+    <p>100 % lokal. Keine Konten, keine Cloud. Tipp: <span class="kbd">Strg/Cmd + S</span> speichert nicht – Exportiere stattdessen regelmäßig <strong>JSON</strong>. Du kannst die Datei später wieder importieren.</p>
+  </div>  <script>
+  // --- Utilities ---
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const todayISO = () => new Date().toISOString().slice(0,10);
+  const parseLines = t => (t||"").split(/\n+/).map(s=>s.trim()).filter(Boolean);
+
+  // --- Storage Layer (localStorage) ---
+  const KEY = 'decision_capsules_v1';
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {capsules: []}; } catch { return {capsules: []}; } };
+  const save = (state) => { localStorage.setItem(KEY, JSON.stringify(state)); refresh(); };
+
+  // --- Templates ---
+  const TEMPLATES = [
+    { id:'buy', name:'Kaufentscheidung', data:{ title:'Kaufentscheidung', decision:'Ich kaufe <Produkt> / Alternative verworfen.', options:'Kaufen\nNicht kaufen\nAlternative X', chosen:'Kaufen', reasons:'Nutzen/Preis ok\nWartung/Support geklärt', assumptions:'Preis bleibt stabil\nKein besseres Angebot kurzfristig', success:'Zufriedenheit ≥ 8/10 nach 30 Tagen; Budget eingehalten', confidence:70 }},
+    { id:'health', name:'Gesundheitsroutine', data:{ title:'Neue Routine testen', decision:'Ich teste <Routine> für 14 Tage.', options:'Routine A\nRoutine B\nNicht ändern', chosen:'Routine A', reasons:'Geringe Einstiegshürde\nMessbarer Effekt', assumptions:'Keine Nebenwirkungen', success:'Schlafqualität +2 Punkte; Energie 7/10', confidence:65 }},
+    { id:'project', name:'Projekt starten', data:{ title:'Kleines Projekt starten', decision:'Ich starte Projekt <X> (Scope klein).', options:'Starten\nSpäter prüfen\nVerwerfen', chosen:'Starten', reasons:'Machbarkeit hoch\nLernwert', assumptions:'Freie Abende vorhanden', success:'MVP in 2 Wochen; 5 Testnutzer', confidence:60 }}
+  ];
+
+  // --- State ---
+  let STATE = load();
+
+  // --- Init ---
+  function init(){
+    // Template select
+    const sel = $('#templateSel');
+    sel.innerHTML = '<option value="">– Vorlage wählen –</option>' + TEMPLATES.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+    sel.addEventListener('change', () => applyTemplate(sel.value));
+
+    // Buttons
+    $('#btn-save').addEventListener('click', onSave);
+    $('#btn-ics').addEventListener('click', onICS);
+    $('#btn-clear').addEventListener('click', clearForm);
+    $('#btn-export-json').addEventListener('click', exportJSON);
+    $('#btn-export-csv').addEventListener('click', exportCSV);
+    $('#import-json').addEventListener('change', importJSON);
+    $('#btn-save-review').addEventListener('click', saveReview);
+    $('#btn-export-csv').addEventListener('click', exportCSV);
+
+    // Defaults
+    if(!$('#reviewDate').value) $('#reviewDate').value = todayISO();
+
+    refresh();
+  }
+
+  function applyTemplate(id){
+    const t = TEMPLATES.find(x=>x.id===id);
+    if(!t) return;
+    $('#title').value = t.data.title || '';
+    $('#decision').value = t.data.decision || '';
+    $('#options').value = t.data.options || '';
+    $('#chosen').value = t.data.chosen || '';
+    $('#reasons').value = t.data.reasons || '';
+    $('#assumptions').value = t.data.assumptions || '';
+    $('#success').value = t.data.success || '';
+    $('#confidence').value = t.data.confidence || 60;
+  }
+
+  // --- Save Capsule ---
+  function onSave(){
+    const capsule = {
+      id: uid(),
+      dateCreated: new Date().toISOString(),
+      title: $('#title').value.trim(),
+      decision: $('#decision').value.trim(),
+      options: parseLines($('#options').value),
+      chosen: $('#chosen').value.trim(),
+      reasons: parseLines($('#reasons').value),
+      assumptions: parseLines($('#assumptions').value),
+      success: $('#success').value.trim(),
+      reviewDate: $('#reviewDate').value || todayISO(),
+      confidence: clamp(parseInt($('#confidence').value,10), 1, 99),
+      notes: $('#notes').value.trim(),
+      status: 'open',
+      outcome: null, // 'success'|'partial'|'fail'
+      brier: null
+    };
+
+    if(!capsule.title){ alert('Titel fehlt.'); return; }
+    if(!capsule.decision){ alert('Entscheidung fehlt.'); return; }
+
+    STATE.capsules.push(capsule);
+    save(STATE);
+    clearForm();
+  }
+
+  function clamp(n,min,max){ return Math.max(min, Math.min(max, isNaN(n)?min:n)); }
+
+  function clearForm(){
+    ['title','decision','options','chosen','reasons','assumptions','success','notes'].forEach(id=>$("#"+id).value='');
+    $('#confidence').value = 70; $('#reviewDate').value = todayISO(); $('#templateSel').value='';
+  }
+
+  // --- ICS Export ---
+  function onICS(){
+    const title = $('#title').value.trim() || 'Decision Capsule Review';
+    const dt = $('#reviewDate').value || todayISO();
+    const uidv = uid();
+    // All-day event in local time
+    const dtstamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\..*/,'Z');
+    const dtstart = dt.replace(/-/g,'');
+    const ics = [
+      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DecisionCapsule//DE','CALSCALE:GREGORIAN',
+      'BEGIN:VEVENT',
+      `UID:${uidv}@decisioncapsule.local`,
+      `DTSTAMP:${dtstamp}`,
+      `DTSTART;VALUE=DATE:${dtstart}`,
+      `SUMMARY:Decision Capsule Review: ${escapeICS(title)}`,
+      'END:VEVENT','END:VCALENDAR' 
+    ].join('\r\n');
+    downloadFile('decision-review.ics', ics, 'text/calendar');
+  }
+  function escapeICS(s){ return s.replace(/,/g,'\\,').replace(/;/g,'\\;'); }
+
+  // --- Export / Import ---
+  function exportJSON(){ downloadFile('decision-capsules.json', JSON.stringify(STATE,null,2), 'application/json'); }
+  function exportCSV(){
+    const rows = [ ['id','title','dateCreated','reviewDate','decision','chosen','confidence','status','outcome','brier'] ];
+    STATE.capsules.forEach(c=>{
+      rows.push([c.id,c.title,c.dateCreated,c.reviewDate,c.decision,c.chosen,c.confidence,c.status,c.outcome??'', c.brier??'']);
+    });
+    const csv = rows.map(r=>r.map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+    downloadFile('decision-capsules.csv', csv, 'text/csv');
+  }
+  function importJSON(ev){
+    const file = ev.target.files?.[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const data = JSON.parse(reader.result);
+        if(!data || !Array.isArray(data.capsules)) throw new Error('Ungültiges Format');
+        STATE = data; save(STATE);
+      }catch(e){ alert('Import fehlgeschlagen: '+ e.message); }
+    };
+    reader.readAsText(file);
+  }
+  function downloadFile(name, content, type){
+    const blob = new Blob([content], {type});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // --- Review ---
+  function saveReview(){
+    const id = $('#rev-id').value; if(!id){ alert('Bitte Capsule wählen.'); return; }
+    const res = $('#rev-result').value; if(!res){ alert('Bitte Ergebnis wählen.'); return; }
+    const notes = $('#rev-notes').value.trim();
+    const c = STATE.capsules.find(x=>x.id===id); if(!c) return;
+    c.status = 'reviewed';
+    c.outcome = res; // success | partial | fail
+    const y = res==='success'?1: res==='partial'?0.5:0;
+    const p = (c.confidence??50)/100;
+    c.brier = ((p - y)**2).toFixed(4);
+    c.reviewNotes = notes;
+    save(STATE);
+    $('#rev-notes').value=''; $('#rev-result').value=''; $('#rev-id').value='';
+  }
+
+  // --- UI Refresh ---
+  function refresh(){
+    // Update dashboard stats
+    const open = STATE.capsules.filter(c=>c.status==='open').length;
+    $('#stat-open').textContent = open;
+    const soon = STATE.capsules.filter(c=>c.status==='open' && daysUntil(c.reviewDate) <= 7).length;
+    $('#stat-soon').textContent = soon;
+    const briers = STATE.capsules.map(c=>Number(c.brier)).filter(n=>!isNaN(n));
+    $('#stat-brier').textContent = briers.length? avg(briers).toFixed(3) : '–';
+
+    // Lists
+    renderLists();
+
+    // Review select
+    const rev = $('#rev-id');
+    rev.innerHTML = '<option value="">– wählen –</option>' + STATE.capsules.map(c=>`<option value="${c.id}">${escapeHTML(c.title)} (${c.reviewDate})</option>`).join('');
+
+    // Last sync
+    $('#db-last-sync').textContent = 'Stand: ' + new Date().toLocaleString();
+  }
+
+  function daysUntil(dateStr){
+    const today = new Date(); today.setHours(0,0,0,0);
+    const d = new Date(dateStr+'T00:00:00'); d.setHours(0,0,0,0);
+    return Math.floor((d - today) / (1000*60*60*24));
+  }
+  function avg(arr){ return arr.reduce((a,b)=>a+b,0)/arr.length; }
+  function escapeHTML(s){ return (s||'').replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+
+  function renderLists(){
+    const dueList = $('#list-due');
+    const allList = $('#list-all');
+    dueList.innerHTML = '';
+    allList.innerHTML = '';
+
+    const sorted = [...STATE.capsules].sort((a,b)=> (a.reviewDate||'').localeCompare(b.reviewDate||''));
+    const dueNow = sorted.filter(c=> daysUntil(c.reviewDate) <= 7 && c.status==='open');
+
+    dueNow.forEach(c=> dueList.appendChild(renderItem(c, true)) );
+    sorted.forEach(c=> allList.appendChild(renderItem(c, false)) );
+  }
+
+  function renderItem(c, highlight){
+    const div = document.createElement('div');
+    div.className = 'item';
+    const d = daysUntil(c.reviewDate);
+    const dueCls = d<0? 'overdue' : (d<=7? 'due' : 'okc');
+    div.innerHTML = `
+      <h3>${escapeHTML(c.title)}</h3>
+      <div class="meta">
+        <span>Entschieden: ${new Date(c.dateCreated).toLocaleDateString()}</span>
+        <span class="${dueCls}">Review: ${c.reviewDate} (${d<0? (Math.abs(d)+' Tage überfällig'): (d===0?'heute': 'in '+d+' Tagen')})</span>
+        <span>Confidence: ${c.confidence}%</span>
+        <span>Status: ${c.status}</span>
+        ${c.outcome? `<span>Ergebnis: ${c.outcome}${c.brier? ` · Brier ${c.brier}`:''}</span>`: ''}
+      </div>
+      <div class="hr"></div>
+      <div class="muted">${escapeHTML(c.decision)}</div>
+      <div class="flex" style="margin-top:8px">
+        <button class="btn" data-act="load" data-id="${c.id}">In Formular laden</button>
+        ${c.status==='open'? `<button class="btn" data-act="mark-reviewed" data-id="${c.id}">Als reviewed markieren</button>`:''}
+        <button class="btn err" data-act="del" data-id="${c.id}">Löschen</button>
+      </div>
+    `;
+    div.addEventListener('click', e=>{
+      const t = e.target.closest('button'); if(!t) return;
+      const id = t.getAttribute('data-id');
+      const act = t.getAttribute('data-act');
+      if(act==='del') {
+        if(confirm('Capsule wirklich löschen?')){
+          STATE.capsules = STATE.capsules.filter(x=>x.id!==id); save(STATE);
+        }
+      }
+      if(act==='load'){
+        const c = STATE.capsules.find(x=>x.id===id); if(!c) return;
+        $('#title').value = c.title; $('#decision').value=c.decision; $('#options').value = (c.options||[]).join('\n');
+        $('#chosen').value = c.chosen; $('#reasons').value=(c.reasons||[]).join('\n');
+        $('#assumptions').value=(c.assumptions||[]).join('\n'); $('#success').value=c.success; $('#reviewDate').value=c.reviewDate;
+        $('#confidence').value=c.confidence; $('#notes').value=c.notes||'';
+        window.scrollTo({top:0,behavior:'smooth'});
+      }
+      if(act==='mark-reviewed'){
+        $('#rev-id').value = id; document.querySelector('section[aria-label="Review"]').scrollIntoView({behavior:'smooth'});
+      }
+    });
+    return div;
+  }
+
+  // Kickoff
+  init();
+  </script></body>
+</html>
