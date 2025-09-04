@@ -29,12 +29,14 @@
   </header>
 
   <main>
+    <!-- Neue Capsule -->
     <section class="card" id="cardNew" aria-label="Neue Capsule">
       <div class="head">
         <h2>Neue Capsule</h2>
         <span class="tag">Alles bleibt lokal</span>
       </div>
 
+      <!-- Stepper -->
       <div id="stepper" class="stepper">
         <div class="step" data-step="1"><span>①</span> Thema & Titel</div>
         <div class="step" data-step="2"><span>②</span> Entscheidung</div>
@@ -45,21 +47,16 @@
       <div class="body">
         <div class="hint">In 4 Schritten. Kurze Sätze. Große Buttons.</div>
 
-        <!-- STEP 1 ist als Fallback initial sichtbar -->
+        <!-- STEP 1 – aktiv als Fallback -->
         <div class="wiz-step active" data-step="1">
-          <div class="grid-templates">
-            <div id="topicGrid" class="topic-grid" aria-label="Themen & Vorlagen"></div>
-          </div>
+          <div id="topicGrid" class="topic-grid" aria-label="Themen & Vorlagen"></div>
+
           <label for="title">Titel</label>
           <input id="title" type="text" placeholder="z. B. Neues Handy kaufen?">
-          <div class="mini muted">Tipp: Thema wählen hilft beim Vorschlag. Du kannst es später ändern.</div>
 
-          <div class="row-3" style="margin-top:10px">
-            <div>
-              <label for="templateSel">Vorlage</label>
-              <select id="templateSel"></select>
-              <div class="mini muted" id="catBadge">Kategorie: –</div>
-            </div>
+          <div class="mini muted" id="catBadge">Kategorie: –</div>
+
+          <div class="row">
             <div>
               <label for="reviewDate">Review-Datum</label>
               <input id="reviewDate" type="date">
@@ -188,6 +185,7 @@
           </div>
         </div>
 
+        <!-- Formular-Buttons in Form-Ansicht -->
         <div class="form-only">
           <div class="hr"></div>
           <div class="flex">
@@ -198,6 +196,7 @@
         </div>
       </div>
 
+      <!-- Wizard Bottom Bar -->
       <div id="wizardNav" class="wizard-nav">
         <button class="btn" id="btn-prev" type="button">Zurück</button>
         <div class="right">
@@ -208,7 +207,7 @@
       </div>
     </section>
 
-    <!-- Dashboard + Review wie gehabt ... -->
+    <!-- Dashboard -->
     <section class="card" aria-label="Dashboard & Kapseln">
       <div class="head"><h2>Dashboard</h2><span class="tag" id="db-last-sync">Stand: –</span></div>
       <div class="body">
@@ -226,10 +225,10 @@
       </div>
     </section>
 
+    <!-- Review -->
     <section class="card" aria-label="Review" style="grid-column: 1 / -1;">
       <div class="head"><h2>Review</h2><span class="tag">Ergebnis festhalten → Lernen</span></div>
       <div class="body">
-        <!-- Review-Form wie zuvor -->
         <div class="row">
           <div>
             <label for="rev-id">Capsule auswählen</label>
@@ -255,7 +254,21 @@
     </section>
   </main>
 
-  <!-- Beide Skripte mit defer; templates.js kommt VOR app.js -->
+  <!-- Drawer für „Mehr…“ -->
+  <div id="drawer" class="drawer hidden" aria-hidden="true">
+    <div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+      <div class="drawer-head">
+        <b id="drawer-title">Weitere Vorlagen</b>
+        <button class="btn tiny" id="drawer-close" type="button">Schließen</button>
+      </div>
+      <div id="drawer-content" class="drawer-content"></div>
+    </div>
+  </div>
+
+  <div class="footer wrap">
+    <p>100 % lokal. Kein Login, keine Cloud. Exportiere regelmäßig <span class="kbd">JSON</span>; Import stellt Kapseln <em>und</em> Kalibrierungsprofil wieder her.</p>
+  </div>
+
   <script src="templates.js" defer></script>
   <script src="app.js" defer></script>
 </body>
