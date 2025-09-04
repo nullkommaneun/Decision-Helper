@@ -29,14 +29,12 @@
   </header>
 
   <main>
-    <!-- Linke Spalte: Wizard/Formular (ein Set Felder, unterschiedlich gesteuert) -->
     <section class="card" id="cardNew" aria-label="Neue Capsule">
       <div class="head">
         <h2>Neue Capsule</h2>
         <span class="tag">Alles bleibt lokal</span>
       </div>
 
-      <!-- Wizard Stepper -->
       <div id="stepper" class="stepper">
         <div class="step" data-step="1"><span>①</span> Thema & Titel</div>
         <div class="step" data-step="2"><span>②</span> Entscheidung</div>
@@ -47,10 +45,9 @@
       <div class="body">
         <div class="hint">In 4 Schritten. Kurze Sätze. Große Buttons.</div>
 
-        <!-- STEP 1 -->
-        <div class="wiz-step" data-step="1">
+        <!-- STEP 1 ist als Fallback initial sichtbar -->
+        <div class="wiz-step active" data-step="1">
           <div class="grid-templates">
-            <!-- Themenkacheln kommen aus templates.js → app.js rendert sie -->
             <div id="topicGrid" class="topic-grid" aria-label="Themen & Vorlagen"></div>
           </div>
           <label for="title">Titel</label>
@@ -176,7 +173,7 @@
         <div class="wiz-step" data-step="4">
           <div class="row">
             <div>
-              <label for="reviewDate">Review-Datum</label>
+              <label for="reviewDate2">Review-Datum</label>
               <input id="reviewDate2" type="date">
               <div class="chip-row" style="margin-top:8px">
                 <button class="chip" data-quick-date2="+14">+14</button>
@@ -191,7 +188,6 @@
           </div>
         </div>
 
-        <!-- Formular-Buttons (Form-Ansicht) -->
         <div class="form-only">
           <div class="hr"></div>
           <div class="flex">
@@ -202,7 +198,6 @@
         </div>
       </div>
 
-      <!-- Wizard Bottom Bar -->
       <div id="wizardNav" class="wizard-nav">
         <button class="btn" id="btn-prev" type="button">Zurück</button>
         <div class="right">
@@ -213,7 +208,7 @@
       </div>
     </section>
 
-    <!-- Rechte Spalte: Dashboard -->
+    <!-- Dashboard + Review wie gehabt ... -->
     <section class="card" aria-label="Dashboard & Kapseln">
       <div class="head"><h2>Dashboard</h2><span class="tag" id="db-last-sync">Stand: –</span></div>
       <div class="body">
@@ -231,10 +226,10 @@
       </div>
     </section>
 
-    <!-- Review -->
     <section class="card" aria-label="Review" style="grid-column: 1 / -1;">
       <div class="head"><h2>Review</h2><span class="tag">Ergebnis festhalten → Lernen</span></div>
       <div class="body">
+        <!-- Review-Form wie zuvor -->
         <div class="row">
           <div>
             <label for="rev-id">Capsule auswählen</label>
@@ -260,11 +255,8 @@
     </section>
   </main>
 
-  <div class="footer wrap">
-    <p>100 % lokal. Kein Login, keine Cloud. Exportiere regelmäßig <span class="kbd">JSON</span>; Import stellt Kapseln <em>und</em> Kalibrierungsprofil wieder her.</p>
-  </div>
-
-  <script src="templates.js"></script>
+  <!-- Beide Skripte mit defer; templates.js kommt VOR app.js -->
+  <script src="templates.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>
