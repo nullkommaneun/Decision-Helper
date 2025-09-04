@@ -1,9 +1,7 @@
-/*  Decision Capsule – Vorlagenbibliothek (kann groß werden)
-    Struktur:
+/*  Decision Capsule – Vorlagen & Themen-Metadaten
     - window.TEMPLATES_BY_TOPIC: { "Thema": [ {id,name,category,data:{...}} ] }
-    - window.SUCCESS_CHIPS: { categorySlug: [ "Chip Text", ... ] }
-    Hinweis:
-    - category: kurze Slugs → bestimmen Kalibrierungs-Buckets
+    - window.SUCCESS_CHIPS: { category: [ "Chip", ... ] }
+    - window.TOPIC_META: { Thema: { slug, icon } }  (icon wird nur als Klassenschlüssel verwendet)
 */
 
 (function(){
@@ -22,7 +20,7 @@
       success:"Energie ≥ 7/10 · Schlaf +2 Punkte", confidence:65 }),
     learn:(k="Kurs")=>({ title:"Kursentscheidung", decision:`Ich belege ${k}.`,
       options:"Belegen\nWarteliste\nAblehnen", chosen:"Belegen",
-      reasons:"Klares Ziel\nZeitbudget vorhanden", assumptions:"Kosten/Nutzen ok",
+      reasons:"Klares Ziel\nZeitbudget", assumptions:"Kosten/Nutzen ok",
       success:"Abschluss ≤ 6 Wochen · 2 Anwendungen", confidence:65 }),
     project:(x="Projekt")=>({ title:"Side-Projekt starten", decision:`Ich starte ${x} (kleiner Umfang).`,
       options:"Starten\nSpäter\nVerwerfen", chosen:"Starten",
@@ -52,10 +50,10 @@
       options:"Sofort\nSchrittweise\nNicht", chosen:"Schrittweise",
       reasons:"Automatisierung möglich", assumptions:"Fixkosten konstant",
       success:"Dauerauftrag X €/Monat · 3 Monate halten", confidence:65 }),
-    study:(s="Thema")=>({ title:"Lernziel", decision:`Ich lerne ${s} 4 Wochen.`,
-      options:"Starten\nKleiner Plan\nNicht", chosen:"Kleiner Plan",
-      reasons:"Tägliche 20 Min", assumptions:"Ablenkungen gering",
-      success:"≥ 20 Sessions · Quiz ≥ 80 %", confidence:60 }),
+    recht:(v="Vorgang")=>({ title:"Schreiben erstellen", decision:`Ich erstelle ${v}.`,
+      options:"Heute\nDiese Woche\nNicht", chosen:"Heute",
+      reasons:"Vorlage vorhanden", assumptions:"Frist im Blick",
+      success:"Formal korrekt · fristgerecht · Bestätigung erhalten", confidence:70 }),
   };
 
   const TEMPLATES_BY_TOPIC = {
@@ -125,9 +123,6 @@
       by("weekend-plan", "Wochenende planen","travel",{ title:"Wochenende", decision:"Ich plane <Aktivität>.",
         options:"A\nB\nC", chosen:"A", reasons:"Wetter/Logistik passt", assumptions:"Kosten gering",
         success:"Durchgeführt · Zufriedenheit ≥ 8/10", confidence:70 }),
-      by("fitness-trip", "Aktiv-Ausflug",    "travel",{ title:"Aktiv-Ausflug", decision:"Ich mache <Tour>.",
-        options:"Buchen\nPlanen\nNicht", chosen:"Planen", reasons:"Ausrüstung vorhanden", assumptions:"Wetter stabil",
-        success:"Tour durchgeführt · Erholung hoch", confidence:65 }),
     ],
 
     "Digital & Arbeit": [
@@ -152,11 +147,19 @@
         options:"Analysieren\nBeobachten\nNicht", chosen:"Analysieren",
         reasons:"Risiko verstehen", assumptions:"Kein FOMO",
         success:"Risiko/Return notiert · Entscheidung in 7 Tagen", confidence:60 }),
-      by("mobile-plan",  "Handyvertrag wechseln","finance", Base.finance("Handyvertrag")),
+    ],
+
+    /* NEU */
+    "Recht & Behörden": [
+      by("recht-kuendigung","Kündigung Abo/Vertrag","recht", Base.recht("eine Kündigung")),
+      by("recht-widerspruch","Widerspruch Bescheid","recht", Base.recht("einen Widerspruch")),
+      by("recht-widerruf","Widerruf Kauf","recht", Base.recht("einen Widerruf")),
+      by("recht-maengel","Gewährleistung / Mängelanzeige","recht", Base.recht("eine Mängelanzeige")),
+      by("recht-mietmangel","Mietmangel anzeigen","recht", Base.recht("eine Mietmangel-Anzeige")),
+      by("recht-frist","Fristverlängerung beantragen","recht", Base.recht("einen Fristverlängerungs-Antrag")),
     ],
   };
 
-  // Erfolgschips je Kategorie (werden unter dem Erfolgsfeld angezeigt)
   const SUCCESS_CHIPS = {
     buy:     ["Preis ≤ Budget", "Rückgabe möglich", "Zufriedenheit ≥ 8/10", "in 30 Tagen prüfen"],
     finance: ["Kosten ↓ ≥ 20 %", "Leistung gleich/mehr", "Kündigung fristgerecht", "Bestätigung erhalten"],
@@ -170,9 +173,23 @@
     tools:   ["Zeitersparnis ≥ 30 Min/Woche", "Export möglich", "Team-OK", "Test bestanden"],
     money:   ["Dauerauftrag X €", "3 Monate gehalten", "Notgroschen ≥ 3 Monate", "Ausgaben getrackt"],
     study:   ["≥ 20 Sessions", "Quiz ≥ 80 %", "Projekt abgegeben", "Peer-Feedback"],
+    recht:   ["formal korrekt", "fristgerecht", "Einschreiben/Einwurf", "Bestätigung erhalten"],
     general: ["Ziel erreicht", "keine Probleme", "Zeitplan gehalten", "Review in 30 Tagen"]
+  };
+
+  const TOPIC_META = {
+    "Kauf & Finanzen":       { slug:"buy"     },
+    "Gesundheit & Fitness":  { slug:"health"  },
+    "Lernen & Projekte":     { slug:"learn"   },
+    "Beziehungen & Alltag":  { slug:"personal"},
+    "Wohnen & Organisation": { slug:"home"    },
+    "Reise & Freizeit":      { slug:"travel"  },
+    "Digital & Arbeit":      { slug:"digital" },
+    "Geld & Verträge":       { slug:"money"   },
+    "Recht & Behörden":      { slug:"recht"   }
   };
 
   window.TEMPLATES_BY_TOPIC = TEMPLATES_BY_TOPIC;
   window.SUCCESS_CHIPS = SUCCESS_CHIPS;
+  window.TOPIC_META = TOPIC_META;
 })();
