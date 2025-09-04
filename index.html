@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Decision Capsule · lokal · offline</title>
+  <meta name="description" content="Entscheidungen treffen. Schritt für Schritt. Objektive Auto-Wahrscheinlichkeit. 100 % lokal, ohne Cloud." />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="simple view-wizard">
+  <header>
+    <div class="wrap">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Decision Capsule <span class="pill">lokal · offline</span></h1>
+          <div class="sub">Hypothese → Entscheidung → Review. Wizard mit Auto-Confidence.</div>
+        </div>
+        <div class="right flex">
+          <button class="btn" id="btn-view" type="button" title="Wizard/Formular umschalten">Ansicht: Wizard</button>
+          <button class="btn" id="btn-mode" type="button" title="Einfach/Pro umschalten">Modus: Einfach</button>
+          <button class="btn" id="btn-export-json" type="button" title="Alle Kapseln & Profil exportieren">Export JSON</button>
+          <label class="btn" for="import-json">Import JSON
+            <input id="import-json" type="file" accept="application/json" style="display:none">
+          </label>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Linke Spalte: Wizard/Formular (ein Set Felder, unterschiedlich gesteuert) -->
+    <section class="card" id="cardNew" aria-label="Neue Capsule">
+      <div class="head">
+        <h2>Neue Capsule</h2>
+        <span class="tag">Alles bleibt lokal</span>
+      </div>
+
+      <!-- Wizard Stepper -->
+      <div id="stepper" class="stepper">
+        <div class="step" data-step="1"><span>①</span> Thema & Titel</div>
+        <div class="step" data-step="2"><span>②</span> Entscheidung</div>
+        <div class="step" data-step="3"><span>③</span> Erfolg & %</div>
+        <div class="step" data-step="4"><span>④</span> Review</div>
+      </div>
+
+      <div class="body">
+        <div class="hint">In 4 Schritten. Kurze Sätze. Große Buttons.</div>
+
+        <!-- STEP 1 -->
+        <div class="wiz-step" data-step="1">
+          <div class="grid-templates">
+            <!-- Themenkacheln kommen aus templates.js → app.js rendert sie -->
+            <div id="topicGrid" class="topic-grid" aria-label="Themen & Vorlagen"></div>
+          </div>
+          <label for="title">Titel</label>
+          <input id="title" type="text" placeholder="z. B. Neues Handy kaufen?">
+          <div class="mini muted">Tipp: Thema wählen hilft beim Vorschlag. Du kannst es später ändern.</div>
+
+          <div class="row-3" style="margin-top:10px">
+            <div>
+              <label for="templateSel">Vorlage</label>
+              <select id="templateSel"></select>
+              <div class="mini muted" id="catBadge">Kategorie: –</div>
+            </div>
+            <div>
+              <label for="reviewDate">Review-Datum</label>
+              <input id="reviewDate" type="date">
+            </div>
+            <div>
+              <label class="invisible">Schnelltermin</label>
+              <div class="chip-row">
+                <button class="chip" data-quick-date="+14">+14 Tage</button>
+                <button class="chip" data-quick-date="+30">+30 Tage</button>
+                <button class="chip" data-quick-date="+60">+60 Tage</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="wiz-step" data-step="2">
+          <label for="decision">Ich entscheide mich für …</label>
+          <input id="decision" type="text" placeholder="Ich wähle Option B.">
+          <div class="row">
+            <div>
+              <label for="chosen">Option</label>
+              <input id="chosen" type="text" placeholder="Option B">
+            </div>
+            <div class="advanced">
+              <label for="options">Weitere Optionen (eine pro Zeile)</label>
+              <textarea id="options" placeholder="Option A&#10;Option B&#10;Option C"></textarea>
+            </div>
+          </div>
+          <details class="light">
+            <summary>Details hinzufügen (optional)</summary>
+            <div class="row">
+              <div>
+                <label for="reasons">Gründe (eine Zeile = ein Punkt)</label>
+                <textarea id="reasons" placeholder="Grund 1&#10;Grund 2"></textarea>
+              </div>
+              <div>
+                <label for="assumptions">Risiken/Annahmen</label>
+                <textarea id="assumptions" placeholder="Risiko 1&#10;Annahme 1"></textarea>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="wiz-step" data-step="3">
+          <label for="success">Woran siehst du, dass es geklappt hat?</label>
+          <input id="success" type="text" placeholder="z. B. Preis ≤ 300 € · Zufriedenheit ≥ 8/10 · in 30 Tagen prüfen">
+          <div id="successChips" class="chip-row" aria-label="Vorschläge"></div>
+
+          <div style="margin-top:12px">
+            <label for="confidenceRange">Erfolgs-Wahrscheinlichkeit</label>
+            <div class="range">
+              <input id="confidenceRange" type="range" min="1" max="99" step="1" value="70" aria-label="Erfolgswahrscheinlichkeit">
+              <output id="confidenceOut">70%</output>
+              <button class="btn tiny" id="btn-apply-auto" type="button" title="Auto-Vorschlag übernehmen">Auto&nbsp;<span id="autoVal">–%</span></button>
+            </div>
+            <div class="muted mini" id="autoExplain">Auto-Vorschlag erscheint, sobald genügend Infos vorliegen.</div>
+          </div>
+
+          <details class="factors">
+            <summary>Faktoren (machen den Auto-Vorschlag besser)</summary>
+            <div class="row-3">
+              <div>
+                <label>Reversibel?</label>
+                <div class="chip-row" data-factor="reversible">
+                  <button class="chip chip-toggle" data-value="1">Ja</button>
+                  <button class="chip chip-toggle" data-value="0">Nein</button>
+                </div>
+              </div>
+              <div>
+                <label>Einsatz</label>
+                <div class="chip-row" data-factor="stake">
+                  <button class="chip chip-toggle" data-value="low">Niedrig</button>
+                  <button class="chip chip-toggle" data-value="mid">Mittel</button>
+                  <button class="chip chip-toggle" data-value="high">Hoch</button>
+                </div>
+              </div>
+              <div>
+                <label>Vertraut</label>
+                <div class="chip-row" data-factor="familiarity">
+                  <button class="chip chip-toggle" data-value="0">Gering</button>
+                  <button class="chip chip-toggle" data-value="1">Mittel</button>
+                  <button class="chip chip-toggle" data-value="2">Hoch</button>
+                </div>
+              </div>
+            </div>
+            <div class="row-3">
+              <div>
+                <label>Belege</label>
+                <div class="chip-row" data-factor="evidence">
+                  <button class="chip chip-toggle" data-value="0">Keine</button>
+                  <button class="chip chip-toggle" data-value="1">Einige</button>
+                  <button class="chip chip-toggle" data-value="2">Stark</button>
+                </div>
+              </div>
+              <div>
+                <label>Zeitpuffer</label>
+                <div class="chip-row" data-factor="timeBuffer">
+                  <button class="chip chip-toggle" data-value="0">Knapp</button>
+                  <button class="chip chip-toggle" data-value="1">Mittel</button>
+                  <button class="chip chip-toggle" data-value="2">Viel</button>
+                </div>
+              </div>
+              <div class="mini muted" style="align-self:end;">Tipp: Tippe Chips, der Vorschlag passt sich an.</div>
+            </div>
+          </details>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="wiz-step" data-step="4">
+          <div class="row">
+            <div>
+              <label for="reviewDate">Review-Datum</label>
+              <input id="reviewDate2" type="date">
+              <div class="chip-row" style="margin-top:8px">
+                <button class="chip" data-quick-date2="+14">+14</button>
+                <button class="chip" data-quick-date2="+30">+30</button>
+                <button class="chip" data-quick-date2="+60">+60</button>
+              </div>
+            </div>
+            <div>
+              <label>Vorschau (so erscheint es im Dashboard)</label>
+              <div id="summaryCard" class="summary"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formular-Buttons (Form-Ansicht) -->
+        <div class="form-only">
+          <div class="hr"></div>
+          <div class="flex">
+            <button class="btn pri" id="btn-save" type="button">Capsule speichern</button>
+            <button class="btn" id="btn-ics" type="button">Review-Termin (.ics)</button>
+            <button class="btn warn" id="btn-clear" type="button">Formular leeren</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wizard Bottom Bar -->
+      <div id="wizardNav" class="wizard-nav">
+        <button class="btn" id="btn-prev" type="button">Zurück</button>
+        <div class="right">
+          <button class="btn pri" id="btn-next" type="button">Weiter</button>
+          <button class="btn ok" id="btn-save-wizard" type="button">Capsule speichern</button>
+          <button class="btn" id="btn-ics-wizard" type="button">Kalender (.ics)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rechte Spalte: Dashboard -->
+    <section class="card" aria-label="Dashboard & Kapseln">
+      <div class="head"><h2>Dashboard</h2><span class="tag" id="db-last-sync">Stand: –</span></div>
+      <div class="body">
+        <div class="stats">
+          <div class="stat"><div class="muted">Offene Kapseln</div><b id="stat-open">0</b></div>
+          <div class="stat"><div class="muted">Fällig ≤7 Tage</div><b id="stat-soon">0</b></div>
+          <div class="stat"><div class="muted">Kalibrierung (Brier↓)</div><b id="stat-brier">–</b></div>
+        </div>
+        <div class="hr"></div>
+        <h3 style="margin:0 0 8px 0">Fällig & demnächst</h3>
+        <div id="list-due" class="list" aria-live="polite"></div>
+        <div class="hr"></div>
+        <h3 style="margin:0 0 8px 0">Alle Kapseln</h3>
+        <div id="list-all" class="list" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- Review -->
+    <section class="card" aria-label="Review" style="grid-column: 1 / -1;">
+      <div class="head"><h2>Review</h2><span class="tag">Ergebnis festhalten → Lernen</span></div>
+      <div class="body">
+        <div class="row">
+          <div>
+            <label for="rev-id">Capsule auswählen</label>
+            <select id="rev-id"></select>
+          </div>
+          <div>
+            <label for="rev-result">Ergebnis</label>
+            <select id="rev-result">
+              <option value="">– bitte wählen –</option>
+              <option value="success">Erfolg (1)</option>
+              <option value="partial">Teil-Erfolg (0.5)</option>
+              <option value="fail">Fehlschlag (0)</option>
+            </select>
+          </div>
+        </div>
+        <label for="rev-notes">Review-Notizen</label>
+        <textarea id="rev-notes" placeholder="Was hast du gelernt?"></textarea>
+        <div class="flex">
+          <button class="btn ok" id="btn-save-review" type="button">Review speichern</button>
+          <button class="btn" id="btn-export-csv" type="button">CSV Export</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer wrap">
+    <p>100 % lokal. Kein Login, keine Cloud. Exportiere regelmäßig <span class="kbd">JSON</span>; Import stellt Kapseln <em>und</em> Kalibrierungsprofil wieder her.</p>
+  </div>
+
+  <script src="templates.js"></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
